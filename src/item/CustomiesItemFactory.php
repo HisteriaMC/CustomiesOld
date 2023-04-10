@@ -57,18 +57,20 @@ final class CustomiesItemFactory {
 		return array_values($this->itemTableEntries);
 	}
 
-	/**
-	 * Registers the item to the item factory and assigns it an ID. It also updates the required mappings and stores the
-	 * item components if present.
-	 * @phpstan-param class-string $className
-	 */
-	public function registerItem(string $className, string $identifier, string $name): void {
-		if($className !== Item::class) {
-			Utils::testValidInstance($className, Item::class);
-		}
+    /**
+     * Registers the item to the item factory and assigns it an ID. It also updates the required mappings and stores the
+     * item components if present.
+     * @phpstan-param class-string $className
+     */
+    public function registerItem(Item $item, string $identifier): void
+    {
+        /*if ($className !== Item::class)
+            Utils::testValidInstance($className, Item::class);
 
-		$itemId = ItemTypeIds::newId();
-		$item = new $className(new ItemIdentifier($itemId), $name);
+        $itemId = Cache::getInstance()->getNextAvailableItemID($identifier);
+        $item = new $className(new ItemIdentifier($itemId), $name);*/
+        $itemId = $item->getTypeId();
+        $name = $item->getName();
 		$this->registerCustomItemMapping($identifier, $itemId);
 
 		GlobalItemDataHandlers::getDeserializer()->map($identifier, fn() => clone $item);
