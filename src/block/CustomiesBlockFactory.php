@@ -80,6 +80,7 @@ final class CustomiesBlockFactory {
 	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $objectToState = null, ?Closure $stateToObject = null): void {
 		$id = BlockTypeIds::newId();
 		$block = $blockFunc($id);
+        $id = $block->getTypeId();
 		if(!$block instanceof Block) {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
 		}
