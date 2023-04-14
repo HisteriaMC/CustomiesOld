@@ -8,6 +8,7 @@ use customiesdevs\customies\item\component\ArmorComponent;
 use customiesdevs\customies\item\component\CooldownComponent;
 use customiesdevs\customies\item\component\CreativeCategoryComponent;
 use customiesdevs\customies\item\component\CreativeGroupComponent;
+use customiesdevs\customies\item\component\DestroyCreativeItemComponent;
 use customiesdevs\customies\item\component\DisplayNameComponent;
 use customiesdevs\customies\item\component\DurabilityComponent;
 use customiesdevs\customies\item\component\FoodComponent;
@@ -29,6 +30,7 @@ use pocketmine\item\Armor;
 use pocketmine\item\Durable;
 use pocketmine\item\Food;
 use pocketmine\item\ProjectileItem;
+use pocketmine\item\Sword;
 use pocketmine\nbt\tag\CompoundTag;
 use RuntimeException;
 
@@ -110,6 +112,10 @@ trait ItemComponentsTrait {
 		if($this->getFuelTime() > 0) {
 			$this->addComponent(new FuelComponent($this->getFuelTime()));
 		}
+
+        if (!$this instanceof Sword) {
+            $this->addComponent(new DestroyCreativeItemComponent(false));
+        }
 	}
 
 	/**
