@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace customiesdevs\customies\block;
 
 use pocketmine\math\Vector3;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\ListTag;
@@ -15,15 +16,17 @@ final class Model {
 	private string $geometry;
 	private Vector3 $origin;
 	private Vector3 $size;
+    private bool $collidable;
 
 	/**
 	 * @param Material[] $materials
 	 */
-	public function __construct(array $materials, string $geometry, Vector3 $origin, Vector3 $size) {
+	public function __construct(array $materials, string $geometry, ?Vector3 $origin = null, ?Vector3 $size = null, bool $collidable = true) {
 		$this->materials = $materials;
 		$this->geometry = $geometry;
-		$this->origin = $origin;
-		$this->size = $size;
+		$this->origin = $origin ?? new Vector3(-8, 0, -8); // must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
+		$this->size = $size ?? new Vector3(16, 16, 16); // must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
+        $this->collidable = $collidable;
 	}
 
 	/**
@@ -42,7 +45,7 @@ final class Model {
 				->setTag("materials", $materials),
 			"minecraft:geometry" => CompoundTag::create()
 				->setString("value", $this->geometry),
-			"minecraft:collision_box" => CompoundTag::create()
+			"minecraft:collision_box" => $this->collidable ? CompoundTag::create()
 				->setByte("enabled", 1)
 				->setTag("origin", new ListTag([
 					new FloatTag($this->origin->getX()),
@@ -53,8 +56,8 @@ final class Model {
 					new FloatTag($this->size->getX()),
 					new FloatTag($this->size->getY()),
 					new FloatTag($this->size->getZ())
-				])),
-			"minecraft:selection_box" => CompoundTag::create()
+				])) : new ByteTag(0), //0 = false, no collissions
+			"minecraft:selection_box" => $this->collidable ? CompoundTag::create()
 				->setByte("enabled", 1)
 				->setTag("origin", new ListTag([
 					new FloatTag($this->origin->getX()),
@@ -65,7 +68,7 @@ final class Model {
 					new FloatTag($this->size->getX()),
 					new FloatTag($this->size->getY()),
 					new FloatTag($this->size->getZ())
-				]))
+				])) : new ByteTag(0)
 		];
 	}
 }
