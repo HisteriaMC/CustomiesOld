@@ -24,6 +24,7 @@ use customiesdevs\customies\item\component\UseAnimationComponent;
 use customiesdevs\customies\item\component\UseDurationComponent;
 use customiesdevs\customies\item\component\WearableComponent;
 use customiesdevs\customies\util\NBT;
+use minicore\CustomPlayer;
 use pocketmine\entity\Consumable;
 use pocketmine\inventory\ArmorInventory;
 use pocketmine\item\Armor;
@@ -47,9 +48,21 @@ trait ItemComponentsTrait {
 		return isset($this->components[$name]);
 	}
 
-	public function getComponents(): CompoundTag {
+	public function getComponents(?CustomPlayer $player = null): CompoundTag {
 		$components = CompoundTag::create();
 		$properties = CompoundTag::create();
+        $oldComponents = $this->components;
+
+        if (!is_null($player)) {
+            $resolution = $player->getTextureResolution($this);
+            if ($resolution !== 16) {
+                $this->setupRenderOffsets(
+                    $resolution, $resolution,
+                    method_exists($this, 'isHandEquiped') && $this->isHandEquiped()
+                );
+            }
+        }
+
 		foreach($this->components as $component){
 			$tag = NBT::getTagType($component->getValue());
 			if($tag === null) {
@@ -62,6 +75,7 @@ trait ItemComponentsTrait {
 			$components->setTag($component->getName(), $tag);
 		}
 
+        $this->components = $oldComponents; //rollback if player based calculation changes were made
 		return CompoundTag::create()
 			->setTag("components", $components->setTag("item_properties", $properties));
 	}

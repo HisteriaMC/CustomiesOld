@@ -5,6 +5,7 @@ namespace customiesdevs\customies;
 
 use customiesdevs\customies\block\CustomiesBlockFactory;
 use customiesdevs\customies\item\CustomiesItemFactory;
+use minicore\CustomPlayer;
 use pocketmine\event\Listener;
 use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\network\mcpe\protocol\BiomeDefinitionListPacket;
@@ -44,7 +45,12 @@ final class CustomiesListener implements Listener {
 					$this->cachedItemComponentPacket = ItemComponentPacket::create(CustomiesItemFactory::getInstance()->getItemComponentEntries());
 				}
 				foreach($event->getTargets() as $session){
-					$session->sendDataPacket($this->cachedItemComponentPacket);
+                    $player = $session->getPlayer();
+                    if ($player instanceof CustomPlayer && $player->isTextureResolutionSet()) {
+                        //ask for custom component packet
+                        $customComponentPacket = ItemComponentPacket::create(CustomiesItemFactory::getInstance()->getItemComponentEntries($player));
+                        $session->sendDataPacket($customComponentPacket);
+                    } else $session->sendDataPacket($this->cachedItemComponentPacket);
 				}
 			} elseif($packet instanceof StartGamePacket) {
 				if(count($this->cachedItemTable) === 0) {

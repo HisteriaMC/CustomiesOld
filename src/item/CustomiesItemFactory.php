@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace customiesdevs\customies\item;
 
 use InvalidArgumentException;
+use minicore\CustomPlayer;
 use pocketmine\block\Block;
 use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\inventory\CreativeInventory;
@@ -28,6 +29,11 @@ final class CustomiesItemFactory {
 	private array $itemTableEntries = [];
 	/** @var ItemComponentPacketEntry[] */
 	private array $itemComponentEntries = [];
+    /**
+     * Identifier in first key of the array and item object in the second
+     * @var array<array{id: int, id_string: string, item: Item}> $itemRegisteredList
+     */
+    private array $itemRegisteredList = [];
 
 	/**
 	 * Get a custom item from its identifier. An exception will be thrown if the item is not registered.
@@ -45,8 +51,8 @@ final class CustomiesItemFactory {
 	 * Returns the item properties CompoundTag which maps out all custom item properties.
 	 * @return ItemComponentPacketEntry[]
 	 */
-	public function getItemComponentEntries(): array {
-		return $this->itemComponentEntries;
+	public function getItemComponentEntries(?CustomPlayer $player = null): array {
+		return is_null($player) ? $this->itemComponentEntries : $this->regenerateItemComponents($player);
 	}
 
 	/**
@@ -87,9 +93,33 @@ final class CustomiesItemFactory {
 			);
 		}
 
+        $this->itemRegisteredList[] = [
+            "id" => $itemId,
+            "id_string" => $identifier,
+            "item" => $item
+        ];
 		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, $componentBased);
 		CreativeInventory::getInstance()->add($item);
 	}
+
+    public function regenerateItemComponents(CustomPlayer $player): array {
+        $itemComponentEntries = [];
+        foreach ($this->itemRegisteredList as $item) {
+            $itemObject = $item["item"];
+            $itemId = $item["id"];
+            $identifier = $item["id_string"];
+
+            if($itemObject instanceof ItemComponents) {
+                $itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier,
+                    new CacheableNbt($itemObject->getComponents($player)
+                        ->setInt("id", $itemId)
+                        ->setString("name", $identifier)
+                    )
+                );
+            }
+        }
+        return $itemComponentEntries;
+    }
 
 	/**
 	 * Registers a custom item ID to the required mappings in the global ItemTypeDictionary instance.
