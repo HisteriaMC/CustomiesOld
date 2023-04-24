@@ -48,8 +48,7 @@ final class CustomiesListener implements Listener {
                     $player = $session->getPlayer();
                     if ($player instanceof CustomPlayer && $player->isTextureResolutionSet()) {
                         //ask for custom component packet
-                        $customComponentPacket = ItemComponentPacket::create(CustomiesItemFactory::getInstance()->getItemComponentEntries($player));
-                        $session->sendDataPacket($customComponentPacket);
+                        $player->resyncTextureResolution();
                     } else $session->sendDataPacket($this->cachedItemComponentPacket);
 				}
 			} elseif($packet instanceof StartGamePacket) {
