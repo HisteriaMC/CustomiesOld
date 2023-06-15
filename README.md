@@ -1,3 +1,5 @@
+# Please consider use HisteriaMC/Customies
+# As the fork system of github does not allow changing upstream we are archiving this repo.
 # Customies
 
 [![](https://poggit.pmmp.io/shield.state/Customies)](https://poggit.pmmp.io/p/Customies) [![](https://poggit.pmmp.io/shield.dl.total/Customies)](https://poggit.pmmp.io/p/Customies)
